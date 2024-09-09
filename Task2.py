@@ -2,10 +2,18 @@ import numpy as np
 
 
 def get_2polynomal_from_3_points(p0: np.array, p1: np.array, p2: np.array) -> np.array:
-    pass
+    # funksjon ax^2 + bx + c = y
+    a = np.array([
+        [p0[0] ** 2, p0[0], 1],
+        [p1[0] ** 2, p1[0], 1],
+        [p2[0] ** 2, p2[0], 1]
+    ])
+    b = np.array([p0[1], p1[1], p2[1]])
+    print(a, b)
 
-# -- CODE --
-
+    x = np.linalg.solve(a, b)
+    print(x)
+    return x
 
 point0 = np.array([0.147, 0.596])
 point1 = np.array([0.7, 0.992])
