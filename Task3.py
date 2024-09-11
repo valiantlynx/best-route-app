@@ -1,20 +1,29 @@
-# Task 3 -- Simple random search
-
-#Find the triplet $a,b,c \in \{x \;|\; x \in \mathbb{Z} \text{ and } 450 > x > 0 \}$
-
-#Using a random search in the parameter space. Such that the following relations is satisfied:
-
-### a
-#$a = \begin{cases} c+11, & \text{if } b\text{ is even} \\ 2c-129, & \text{if } b\text{ is odd} \end{cases}$
-
-### b
-#$b = (a \times c) \mod 2377$
-
-### c
-#$c = \left( \sum\limits_{k=0}^{a-1} b - 7k \right) + 142$
-
-#**Also how many guesses were needed?**
-
-#Note that in math notation $\sum\limits_{k=1}^{5}k = 1+2+3+4+5$
+import random
 
 
+def finnC():
+    n = 0
+    while True:
+        n += 1
+        if n >= 100000:
+            print("Ingen løsning funnet etter {n}".format(n=n)),"forsøk."
+            break
+        c = random.randint(1, 449)
+
+        if c % 2 == 0:
+            a = c + 11
+        else:
+            a = 2 * c - 129
+
+        b = (a * c) % 2377
+
+        sum_result = sum([b - 7 * k for k in range(a)])
+        new_c = sum_result + 142
+
+        if new_c == c:
+            print(f"Løsning funnet etter {n} iterasjoner.")
+            print(f"a = {a}, b = {b}, c = {c}")
+            break
+
+
+finnC()
