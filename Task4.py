@@ -1,24 +1,66 @@
+# # Task 4 -- Revisit the Fortuna Algorithm
+#
+# Below is a implementation of Fortuna that uses fits linear function $f_{\theta} = a x + b$ where $\theta = \{a,b\}$ to a function $g(x)$.
+# However, as is evidently from the graph, $g(x)$ is not a linear function.
+#
+# 1) Change the code to instead use $f_{\theta}(x) = \sum\limits_{k=1}^{3} \Psi_k \sin(\gamma_k (x + \omega_k)) $.
+#   Such that $|\theta| = 9$, where each parameter $c$ in $\theta$ is in $[-4. 4]$.
+# That is, $f_{\theta}(x)$ is a sum of three sin terms. **Do not change the range of the sample\_theta function.**
+#
+# 3) However, it seems Fortuna (on average) struggles to find the optimal parameters $\theta$.
+# Therefore you will have to innovate and change the Fortuna algorithm so that it faster finds "better solutions".
+# What changes did you make and **why** did you make them, and how did you measure how efficient these changes were?
+# A excellent solution here will have an expected best loss of less than 5 using 100000 guesses. (take the average over 100 runs).
+# **But ANY improvment is sufficient to pass!**
+#
+# 4) Using your newly made modified Fortuna Algorithm optimize the function: $h(x) = \mu - (\zeta sin(\kappa x) )  (\tau (x + \lambda))$ .
+# The y values for this function can be found in the numpy array ys_h (in the code below).
+# Does your new and improved Fortuna outperform the regular fortuna on this function as well? Why?
+# **Remember to change your model to match $h(x)$**
+#
+#
+# 4) [**Optional**] Develop a multiprocces implemention of the Fortuna algorithm using python's multiprocessing library (https://docs.python.org/3/library/multiprocessing.html).
+# How are the speed ups? Are Fortuna really suited to parallel execution?
+#
+
+
+
+
+
 import random
 import numpy as np
 import plotly.express as px
 import tqdm
+from dask.array import average
 
 
 def predict(x, theta):
     # change to sum of 3 sin() terms.
     # use np.sin() and not math.sin().
-    a, b = theta
-    return a * x + b  # this is the model
+    #psi = høyde på kurven, gamma = frekvens, omega = faseskifte
+    psi1, psi2, psi3, gamma1, gamma2, gamma3, omega1, omega2, omega3 = theta
+    return (
+            psi1 * np.sin(gamma1 * (x + omega1)) +
+            psi2 * np.sin(gamma2 * (x + omega2)) +
+            psi3 * np.sin(gamma3 * (x + omega3))
+    )  # this is the model
 
+
+def predict2(x, theta):
+    # theta = [mu, k, tau, lambda]
+    mu, k, tau, lam = theta  # renamed `lambda` to `lam` to avoid conflicts with the reserved keyword `lambda`
+    return mu - (np.sin(k * x) * (tau * (x + lam)))
 
 def sample_theta(size_of_theta):
     # Do NOT CHANGE.
+    # Velger random theta verdi mellom -4 og 4.
     theta = np.random.uniform(-4, 4, size=size_of_theta)
     return theta
 
 
 def get_loss(y_hat, ys):
     # No change needed, returns quadratic loss.
+    #L2 Loss funksjon.
     loss = ((y_hat - ys) ** 2).sum()
     return loss
 
@@ -39,27 +81,70 @@ ys_h = np.array(
      -20.83, -22.36, -20.27, -14.59, -5.91, 4.72, 15.9, 26.06, 33.69, 37.58, 36.94, 31.64])
 
 # change to the size of theta ( 9 ) (for h(x) how many parameters does it have?)
-n_params = 2
+n_params = 9
+n_params2 = 4
 
 best_loss = float('inf')
 best_theta = sample_theta(n_params)
 
-for _ in tqdm.tqdm(range(100000)):
-    curr_theta = sample_theta(n_params)
-    y_hat = predict(xs, curr_theta)
-    curr_loss = get_loss(y_hat, ys)
+best_loss2 = float('inf')
+best_theta2 = sample_theta(n_params2)
 
-    if best_loss > curr_loss:
-        best_loss = curr_loss
-        best_theta = curr_theta
+# Incorporating momentum and step size reduction
+learning_rate = 0.1
+no_improvement_count = 0
+max_no_improvement = 5000
+iterations = 100
+iter_best_losses = []
+for i in range(iterations):
+    i += 1
+    for _ in tqdm.tqdm(range(100000)):
+        if no_improvement_count > max_no_improvement:
+            break
+        # Sample theta near the current best theta
+        curr_theta = best_theta + sample_theta(n_params) * learning_rate
+        y_hat = predict(xs, curr_theta)
+        curr_loss = get_loss(y_hat, ys)
+        # If we find a better solution, update the best theta and reset improvement count
+        if best_loss > curr_loss:
+            best_loss = curr_loss
+            best_theta = curr_theta
+            no_improvement_count = 0
+        else:
+            no_improvement_count += 1
+
+        last_100_best_loss = []
+        last_100_best_loss.append(best_loss)
+        if (_ % 100):
+            best_loss = np.mean(last_100_best_loss)
+            last_100_best_loss = []
+
+        # Gradually reduce learning rate
+        learning_rate *= 0.999
+
+        curr_theta2 = sample_theta(n_params2)
+        y_hat2 = predict2(xs, curr_theta2)
+        curr_loss2 = get_loss(y_hat2, ys)
+
+        if best_loss2 > curr_loss2:
+            best_loss2 = curr_loss2
+            best_theta2 = curr_theta2
+
+    iter_best_losses.append(best_loss)
+
+best_loss = np.mean(iter_best_losses)
 
 print("best loss:", best_loss)
 print("theta:", best_theta)
 
+print("best loss2:", best_loss2)
+print("theta2:", best_theta2)
+
 fig = px.line(x=xs, y=ys, title="f(x) vs Fortuna solution")
-fig.add_scatter(x=xs, y=predict(xs, best_theta), mode='lines', name="y_hat")
+fig = px.line(x=xs, y=ys_h, title="f(x) vs Fortuna solution ys_h")
+fig.add_scatter(x=xs, y=predict(xs, best_theta), mode='lines', name="y_hat for predict")
+fig.add_scatter(x=xs, y=predict2(xs, best_theta2), mode='lines', name="y_hat for predict2")
 fig.update_layout(xaxis_range=[xs.min(), xs.max()], yaxis_range=[-6, 6])
 fig.show()
 
 # to get a solid estimate -> you should train at least 100 models and take the average performance.
-
