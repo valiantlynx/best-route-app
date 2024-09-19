@@ -2,7 +2,6 @@ import json
 import os
 import tempfile
 import tqdm
-
 import numpy as np
 import plotly.express as px
 
@@ -44,7 +43,8 @@ params_file = 'best_theta.json'
 
 def save_params(theta, loss):
     """Save the best parameters and the best mean squared error as a JSON file."""
-    print("Hurra!! Found a better model :)")
+    print("Hurra!! Found a better model :)", best_loss)
+
     data = {
         'best_theta': theta.tolist(),  # Ensure it's serializable
         'best_loss': loss
@@ -97,52 +97,50 @@ if loaded_theta is not None and loaded_loss is not None:
     best_loss = loaded_loss
 
 learning_rate = 0.1
-no_improvement_count = 0
-max_no_improvement = 5000
 
-found = False
-while (found == False):
-    for _ in tqdm.tqdm(range(100000)):
+for _ in tqdm.tqdm(range(100000)):
 
-        # best_theta2 = sample_theta(n_params2)
-        curr_theta = best_theta + sample_theta(n_params) * learning_rate
-        y_hat = predict(xs, curr_theta)
-        curr_loss = get_loss(y_hat, ys)
+    # best_theta2 = sample_theta(n_params2)
+    curr_theta = best_theta + sample_theta(n_params) * learning_rate
+    y_hat = predict(xs, curr_theta)
+    curr_loss = get_loss(y_hat, ys)
 
-        # If we find a better solution, update the best theta and reset improvement count
-        if best_loss > curr_loss:
-            best_loss = curr_loss
-            best_theta = curr_theta
-            no_improvement_count = 0
-            save_params(theta=best_theta, loss=best_loss)
-        else:
-            no_improvement_count += 1
+    # If we find a better solution, update the best theta and reset improvement count
+    if best_loss > curr_loss:
+        best_loss = curr_loss
+        best_theta = curr_theta
+        save_params(theta=best_theta, loss=best_loss)
 
-        # Gradually reduce learning rate
-        learning_rate *= 0.999
+    # Gradually reduce learning rate
+    learning_rate *= 0.99
 
-        last_100_best_loss = []
-        last_100_best_loss.append(best_loss)
-        if _ % 100 == 0:
-            best_loss = np.mean(last_100_best_loss)
-            last_100_best_loss = []
+    # last_100_best_loss = []
+    # last_100_best_loss.append(best_loss)
+    # if _ % 100 == 0:
+    #    best_loss = np.mean(last_100_best_loss)
+    #    save_params(theta=best_theta, loss=best_loss)
+    #    last_100_best_loss = []
 
-    #        curr_theta2 = sample_theta(n_params2)
-    #        y_hat2 = predict2(xs, curr_theta2)
-    #        curr_loss2 = get_loss(y_hat2, ys)
+#        curr_theta2 = sample_theta(n_params2)
+#        y_hat2 = predict2(xs, curr_theta2)
+#        curr_loss2 = get_loss(y_hat2, ys)
 
-    #        if best_loss2 > curr_loss2:
-    #            best_loss2 = curr_loss2
-    #            best_theta2 = curr_theta2
+#        if best_loss2 > curr_loss2:
+#            best_loss2 = curr_loss2
+#            best_theta2 = curr_theta2
 
 # print("best loss2:", best_loss2)
 # print("theta2:", best_theta2)
 
 fig = px.line(x=xs, y=ys, title="f(x) vs Fortuna solution")
-fig = px.line(x=xs, y=ys_h, title="f(x) vs Fortuna solution ys_h")
 fig.add_scatter(x=xs, y=predict(xs, best_theta), mode='lines', name="y_hat for predict")
-# fig.add_scatter(x=xs, y=predict2(xs, best_theta2), mode='lines', name="y_hat for predict2")
 fig.update_layout(xaxis_range=[xs.min(), xs.max()], yaxis_range=[-6, 6])
+
 fig.show()
+
+# fig2 = px.line(x=xs, y=ys_h, title="f(x) vs Fortuna solution ys_h")
+# fig2.add_scatter(x=xs, y=predict2(xs, best_theta2), mode='lines', name="y_hat for predict2")
+# fig2.update_layout(xaxis_range=[xs.min(), xs.max()], yaxis_range=[-6, 6])
+# fig.show()
 
 # to get a solid estimate -> you should train at least 100 models and take the average performance.
