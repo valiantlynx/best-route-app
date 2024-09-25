@@ -38,21 +38,19 @@ def get_loss(y_hat, ys):
     return loss
 
 
-params_file = 'best_theta.json'
-
-
-def save_params(theta, loss):
+def save_params(params_file, theta, loss, label='best_theta'):
     """Save the best parameters and the best mean squared error as a JSON file."""
-    print("Hurra!! Found a better model :)", best_loss)
+    #print(f"Hurra!! Found a better model for {label} with loss: {loss}")
 
     data = {
-        'best_theta': theta.tolist(),  # Ensure it's serializable
+        'best_theta': theta.tolist(),
         'best_loss': loss
     }
     with tempfile.NamedTemporaryFile('w', delete=False, dir='.') as tmpfile:
         json.dump(data, tmpfile)
         temp_name = tmpfile.name
     os.replace(temp_name, params_file)
+   # print(f"Saved parameters to {params_file}")
 
 
 xs = np.array(
@@ -72,12 +70,10 @@ ys_h = np.array(
 
 # change to the size of theta ( 9 ) (for h(x) how many parameters does it have?)
 n_params = 9
+n_params2 = 4
 
 
-# n_params2 = 4
-
-
-def load_params():
+def load_params(params_file):
     """Reads the JSON file containing the best parameters and the best mean squared error."""
     try:
         with open(params_file, 'r') as f:
@@ -91,56 +87,51 @@ def load_params():
 best_loss = float('inf')
 best_theta = sample_theta(n_params)
 
-loaded_theta, loaded_loss = load_params()
+loaded_theta, loaded_loss = load_params(params_file='best_theta.json')
 if loaded_theta is not None and loaded_loss is not None:
     best_theta = np.array(loaded_theta)
     best_loss = loaded_loss
 
+best_loss2 = float('inf')
+best_theta2 = sample_theta(n_params2)
+
+loaded_theta2, loaded_loss2 = load_params(params_file='best_theta2.json')
+if loaded_theta2 is not None and loaded_loss2 is not None:
+    best_theta2 = np.array(loaded_theta2)
+    best_loss2 = loaded_loss2
+
 learning_rate = 0.1
 
 for _ in tqdm.tqdm(range(100000)):
-
-    # best_theta2 = sample_theta(n_params2)
     curr_theta = best_theta + sample_theta(n_params) * learning_rate
     y_hat = predict(xs, curr_theta)
     curr_loss = get_loss(y_hat, ys)
+
+    curr_theta2 = best_theta2 + sample_theta(n_params2) * learning_rate
+    y_hat2 = predict2(xs, curr_theta2)
+    curr_loss2 = get_loss(y_hat2, ys_h)
 
     # If we find a better solution, update the best theta and reset improvement count
     if best_loss > curr_loss:
         best_loss = curr_loss
         best_theta = curr_theta
-        save_params(theta=best_theta, loss=best_loss)
+        save_params(params_file = 'best_theta.json', theta=best_theta, loss=best_loss)
 
+    if best_loss2 > curr_loss2:
+        best_loss2 = curr_loss2
+        best_theta2 = curr_theta2
+        save_params(params_file = 'best_theta2.json', theta=best_theta2, loss=best_loss2)
     # Gradually reduce learning rate
-    learning_rate *= 0.99
-
-    # last_100_best_loss = []
-    # last_100_best_loss.append(best_loss)
-    # if _ % 100 == 0:
-    #    best_loss = np.mean(last_100_best_loss)
-    #    save_params(theta=best_theta, loss=best_loss)
-    #    last_100_best_loss = []
-
-#        curr_theta2 = sample_theta(n_params2)
-#        y_hat2 = predict2(xs, curr_theta2)
-#        curr_loss2 = get_loss(y_hat2, ys)
-
-#        if best_loss2 > curr_loss2:
-#            best_loss2 = curr_loss2
-#            best_theta2 = curr_theta2
-
-# print("best loss2:", best_loss2)
-# print("theta2:", best_theta2)
+    learning_rate *= 0.9
 
 fig = px.line(x=xs, y=ys, title="f(x) vs Fortuna solution")
 fig.add_scatter(x=xs, y=predict(xs, best_theta), mode='lines', name="y_hat for predict")
 fig.update_layout(xaxis_range=[xs.min(), xs.max()], yaxis_range=[-6, 6])
-
 fig.show()
 
-# fig2 = px.line(x=xs, y=ys_h, title="f(x) vs Fortuna solution ys_h")
-# fig2.add_scatter(x=xs, y=predict2(xs, best_theta2), mode='lines', name="y_hat for predict2")
-# fig2.update_layout(xaxis_range=[xs.min(), xs.max()], yaxis_range=[-6, 6])
-# fig.show()
+fig2 = px.line(x=xs, y=ys_h, title="f(x) vs Fortuna solution ys_h")
+fig2.add_scatter(x=xs, y=predict2(xs, best_theta2), mode='lines', name="y_hat for predict2")
+fig2.update_layout(xaxis_range=[xs.min(), xs.max()], yaxis_range=[-6, 6])
+fig2.show()
 
 # to get a solid estimate -> you should train at least 100 models and take the average performance.
