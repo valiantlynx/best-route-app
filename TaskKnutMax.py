@@ -47,9 +47,9 @@ def get_the_best_route_as_a_text_informatic(dep_hour, dep_min, n_iterations=1000
     matching_routes = []
     for record in data:
         # Convert departure time string to datetime
-        record_dep_time = datetime.strptime(record['depature'], "%H:%M")
+        json_dep_time = datetime.strptime(record['depature'], "%H:%M")
         # Check if departure time is within the window
-        if time_window_start <= record_dep_time <= time_window_end:
+        if time_window_start <= json_dep_time <= time_window_end:
             matching_routes.append(record)
 
     # If no routes match, return a message

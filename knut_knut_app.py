@@ -22,7 +22,7 @@ TEMPLATE = """
                     <div>
                         <label for="hour" class="block text-sm font-medium text-gray-700">Hour:</label>
                         <select name="hour" id="hour" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                            {% for i in range(6, 17) %}
+                            {% for i in range(7, 17) %}
                                 <option value="{{ '%02d'|format(i) }}">{{ '%02d'|format(i) }}</option>
                             {% endfor %}
                         </select>
@@ -30,7 +30,7 @@ TEMPLATE = """
 
                     <div>
                         <label for="mins" class="block text-sm font-medium text-gray-700">Minutes:</label>
-                        <input type="text" name="mins" id="mins" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="00" size="2" required/>
+                        <input type="text" name="mins" id="mins" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="00" size="2"/>
                     </div>
 
                     <div class="flex justify-center">
@@ -65,7 +65,7 @@ def get_departure_time():
 @app.route("/get_best_route")
 def get_route():
     departure_h = request.args.get('hour')
-    departure_m = request.args.get('mins')
+    departure_m = request.args.get('mins') or 00
 
     # Call your actual function here
     route_info = TaskKnutMax.get_the_best_route_as_a_text_informatic(departure_h, departure_m)
