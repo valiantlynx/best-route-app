@@ -3,7 +3,7 @@ import random
 from datetime import datetime, timedelta
 
 
-# Function to read data from 'traffic.jsonl'
+# Read data from 'traffic.jsonl'
 def read_data(filename):
     data = []
     with open(filename, 'r') as f:
@@ -13,7 +13,7 @@ def read_data(filename):
     return data
 
 
-# Fortuna algorithm simulation for random route selection
+# Fortuna algorithm: Random routes within timewindow, which is input_time -> input_time +30min.
 def fortuna_algorithm(routes, n_iterations):
     best_route = None
     best_travel_time = None
@@ -23,9 +23,6 @@ def fortuna_algorithm(routes, n_iterations):
         route = random.choice(routes)
         dep_time = datetime.strptime(route['depature'], "%H:%M")
         arr_time = datetime.strptime(route['arrival'], "%H:%M")
-        # Handle cases where arrival is on the next day
-        if arr_time < dep_time:
-            arr_time += timedelta(days=1)
         travel_time = arr_time - dep_time
 
         # Update best route if this one is better
@@ -38,23 +35,22 @@ def fortuna_algorithm(routes, n_iterations):
 
 # Function to implement the solution with n iterations
 def get_the_best_route_as_a_text_informatic(dep_hour, dep_min, n_iterations=1000):
-    # Read the data
     data = read_data('traffic.jsonl')
 
     # Convert input departure time to a datetime object
     input_dep_time = datetime.strptime(f"{dep_hour}:{dep_min}", "%H:%M")
 
-    # Define departure time window (input time to input time + 30 minutes)
-    dep_time_window_start = input_dep_time
-    dep_time_window_end = input_dep_time + timedelta(minutes=30)
-
+    # Define departure time_window (input time to input time + 30 minutes)
+    time_window_start = input_dep_time
+    time_window_end = input_dep_time + timedelta(minutes=30)
+    print(time_window_start, time_window_end)
     # Filter routes within the time window
     matching_routes = []
     for record in data:
         # Convert departure time string to datetime
         record_dep_time = datetime.strptime(record['depature'], "%H:%M")
         # Check if departure time is within the window
-        if dep_time_window_start <= record_dep_time <= dep_time_window_end:
+        if time_window_start <= record_dep_time <= time_window_end:
             matching_routes.append(record)
 
     # If no routes match, return a message
@@ -77,7 +73,3 @@ def get_the_best_route_as_a_text_informatic(dep_hour, dep_min, n_iterations=1000
         'arrival': best_route['arrival']
     }
 
-
-# Example usage
-result = get_the_best_route_as_a_text_informatic(10, 0, n_iterations=1000)
-print(result)

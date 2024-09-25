@@ -1,27 +1,9 @@
 import random
 from flask import Flask
 from flask import request
+import TaskKnutMax
 
 app = Flask(__name__)
-
-
-def get_the_best_route_as_a_text_informatic(dep_hour, dep_min):
-    roads = ["A->C->D", "A->C->E", "B->C->D", "B->C->E"]
-
-    # perform some magic here - instead of just a random selection
-    est_travel_time = random.randint(10, 120)
-    best_road = random.choice(roads)
-
-    out = """
-    <p>
-    Departure time: {}:{} <br> 
-    Best travel route: {} <br> 
-    Estimated travel time of {} minutes. </p> 
-    <p><a href="/">Back</a></p>
-    """.format(dep_hour, dep_min, best_road, est_travel_time)
-
-    return out
-
 
 @app.route('/')
 def get_departure_time():
@@ -55,7 +37,7 @@ def get_route():
     departure_h = request.args.get('hour')
     departure_m = request.args.get('mins')
 
-    route_info = get_the_best_route_as_a_text_informatic(departure_h, departure_m)
+    route_info = TaskKnutMax.get_the_best_route_as_a_text_informatic(departure_h, departure_m)
     return route_info
 
 

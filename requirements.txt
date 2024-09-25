@@ -2,3 +2,5 @@ plotly
 jupyterlab>=3
 ipywidgets>=7.6
 numpy
+flask
+requests
