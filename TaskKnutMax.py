@@ -38,12 +38,11 @@ def get_the_best_route_as_a_text_informatic(dep_hour, dep_min, n_iterations=1000
     data = read_data('traffic.jsonl')
 
     # Convert input departure time to a datetime object
-    input_dep_time = datetime.strptime(f"{dep_hour}:{dep_min}", "%H:%M")
+    input_time = datetime.strptime(f"{dep_hour}:{dep_min}", "%H:%M")
 
     # Define departure time_window (input time to input time + 30 minutes)
-    time_window_start = input_dep_time
-    time_window_end = input_dep_time + timedelta(minutes=30)
-    print(time_window_start, time_window_end)
+    time_window_start = input_time
+    time_window_end = input_time + timedelta(minutes=30)
     # Filter routes within the time window
     matching_routes = []
     for record in data:
