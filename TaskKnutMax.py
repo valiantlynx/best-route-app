@@ -52,6 +52,7 @@ def get_the_best_route_as_a_text_informatic(dep_hour, dep_min, n_iterations=1000
         if time_window_start <= json_dep_time <= time_window_end:
             matching_routes.append(record)
 
+    print(matching_routes)
     # If no routes match, return a message
     if not matching_routes:
         return "No matching routes found for the given departure time."

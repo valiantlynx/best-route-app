@@ -109,21 +109,3 @@ print(f"Accuracy on training data: {accuracy * 100:.2f}%")
 # Display the predictions alongside true labels
 for i in range(len(y)):
     print(f"Input: {X[i]}, True Label: {y[i]}, Predicted: {y_pred[i]}")
-
-# Visualize the decision boundary
-# Create a mesh grid for plotting
-xx, yy = np.meshgrid(np.linspace(0, 1, 100), np.linspace(0, 1, 100))
-grid = np.c_[xx.ravel(), yy.ravel()]
-
-# Predict over the grid
-grid_predictions = dt.predict(grid)
-grid_predictions = grid_predictions.reshape(xx.shape)
-
-# Plotting
-plt.figure(figsize=(8, 6))
-plt.contourf(xx, yy, grid_predictions, alpha=0.5, cmap='coolwarm')
-plt.scatter(X[:, 0], X[:, 1], c=y, edgecolor='k', cmap='coolwarm')
-plt.title('Decision Boundary of the Decision Tree')
-plt.xlabel('x0')
-plt.ylabel('x1')
-plt.show()
