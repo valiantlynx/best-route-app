@@ -103,6 +103,8 @@ if loaded_theta2 is not None and loaded_loss2 is not None:
 learning_rate = 0.1
 
 for _ in tqdm.tqdm(range(100000)):
+
+
     curr_theta = best_theta + sample_theta(n_params) * learning_rate
     y_hat = predict(xs, curr_theta)
     curr_loss = get_loss(y_hat, ys)
@@ -111,18 +113,24 @@ for _ in tqdm.tqdm(range(100000)):
     y_hat2 = predict2(xs, curr_theta2)
     curr_loss2 = get_loss(y_hat2, ys_h)
 
+
+
     # If we find a better solution, update the best theta and reset improvement count
     if best_loss > curr_loss:
         best_loss = curr_loss
         best_theta = curr_theta
+        print("New best_loss: ",best_loss)
         save_params(params_file = 'best_theta.json', theta=best_theta, loss=best_loss)
 
     if best_loss2 > curr_loss2:
         best_loss2 = curr_loss2
         best_theta2 = curr_theta2
+        print("New best_loss2: ",best_loss2)
         save_params(params_file = 'best_theta2.json', theta=best_theta2, loss=best_loss2)
-    # Gradually reduce learning rate
-    learning_rate *= 0.9
+    # Gradually reduce learning rates
+  #  learning_rate *= 0.9
+print("Best Loss = ", best_loss)
+print("Best Loss 2 = ", best_loss2)
 
 fig = px.line(x=xs, y=ys, title="f(x) vs Fortuna solution")
 fig.add_scatter(x=xs, y=predict(xs, best_theta), mode='lines', name="y_hat for predict")
