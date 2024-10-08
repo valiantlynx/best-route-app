@@ -18,8 +18,6 @@ def find_triplet():
             if b % 2 == 0 and 0 < b < 450:
                 sum_result = sum([b - 7 * k for k in range(a)])
                 new_c = sum_result + 142
-                print(sum_result)
-                print(new_c)
                 if new_c == c:
                     print(f"Solution found after {n} iterations:")
                     print(f"a = {a}, b = {b}, c = {c}")
@@ -31,8 +29,6 @@ def find_triplet():
             if b % 2 == 1 and 0 < b < 450:
                 sum_result = sum([b - 7 * k for k in range(a)])
                 new_c = sum_result + 142
-                print(sum_result)
-                print(new_c)
                 if new_c == c:
                     print(f"Solution found after {n} iterations:")
                     print(f"a = {a}, b = {b}, c = {c}")
